@@ -1,4 +1,4 @@
-name: Deploy Laravel to DigitalOcean
+name: Deploy to Server
 
 on:
   push:
@@ -6,22 +6,96 @@ on:
       - main
 
 jobs:
-  deploy:
+  deploy-nginx-to-server:
+    name: deploy-nginx-to-server
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-      - name: Install SSH Key
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.KEY }}
-
-      - name: Deploy to DigitalOcean
+      - name: Build Nginx docker image
         run: |
-          ssh -o StrictHostKeyChecking=no root@206.189.157.113 << 'EOF'
-            cd /var/www/my-laravel-app
-            git pull origin main
-            docker-compose up --build -d
-          EOF
+          docker build -f nginxdockerfile -t TEST-docker:0.0.2 .
+
+      - name: Save nginx docker image as tar
+        run: |
+          docker save TEST-docker:0.0.2 -o TEST-docker.tar
+          chmod 644 TEST-docker.tar
+
+      - name: Copy nginx docker image to droplet
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{secrets.HOST}}
+          username: ${{secrets.USERNAME}}
+          key: ${{secrets.KEY}}
+          source: TEST-docker.tar
+          target: ~/images
+
+      - name: Load the nginx and app docker image to run
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{secrets.HOST}}
+          username: ${{secrets.USERNAME}}
+          key: ${{secrets.KEY}}
+          script: |
+            docker load -i /root/images/TEST-docker.tar
+            docker rm -f TEST-docker
+            docker rm -f TEST-docker-app
+
+  deploy-app-to-server:
+    needs: deploy-nginx-to-server
+    name: deploy-app-to-server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Build app docker image
+        run: |
+          docker build -f appdockerfile -t TEST-docker-app:0.0.2 .
+      
+      - name: Save app docker image as tar
+        run: |
+          docker save TEST-docker-app:0.0.2 -o TEST-docker-app.tar
+          chmod 644 TEST-docker-app.tar
+      
+      - name: Copy app docker image to droplet
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{secrets.HOST}}
+          username: ${{secrets.USERNAME}}
+          key: ${{secrets.KEY}}
+          source: TEST-docker-app.tar
+          target: ~/images
+
+      - name: Load the app docker image on the server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.HOST}}
+          username: ${{secrets.USERNAME}}
+          key: ${{secrets.KEY}}
+          command_timeout: 20m
+          script: |
+            docker load -i /root/images/TEST-docker-app.tar
+
+  start-up-containers:
+    needs: [deploy-nginx-to-server, deploy-app-to-server]
+    name: start-up-containers
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Start up containers
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.HOST}}
+          username: ${{secrets.USERNAME}}
+
+          key: ${{secrets.KEY}}
+          script: |
+            docker-compose -f /home/laravel/docker-compose.prod.yml down
+            docker-compose -f /home/laravel/docker-compose.prod.yml up -d --build
+            sudo rm -r /root/images/TEST-docker-app.tar
+            sudo rm -r /root/images/TEST-docker.tar
+            docker system prune -f --volumes
