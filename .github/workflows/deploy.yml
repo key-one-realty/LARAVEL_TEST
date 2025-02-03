@@ -26,7 +26,11 @@ jobs:
              chmod 644 ~/.ssh/known_hosts
              echo "${{ secrets.KEY }}" > ~/.ssh/id_server
 
-
+      - name: Debug SSH Key Output
+        run: |
+               file ~/.ssh/id_server
+               cat ~/.ssh/id_server
+           
         
       - name: Test SSH Connection
         run: |
