@@ -9,10 +9,21 @@ jobs:
   deploy:
     name: Deploy Laravel to DigitalOcean
     runs-on: ubuntu-latest
+    
+    
+    
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+
+      - name: Setup SSH Key
+        run: |
+            mkdir -p ~/.ssh
+            echo "${{ secrets.KEY }}" > ~/.ssh/id_server
+            chmod 600 ~/.ssh/id_server
+            ssh-keyscan -H ${{secrets.HOST }} >> ~/.ssh/known_hosts
+            cat ~/.ssh/id_server
 
       - name: Build Laravel Docker Image
         run: |
