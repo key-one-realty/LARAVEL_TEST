@@ -30,6 +30,7 @@ jobs:
         run: |
                file ~/.ssh/id_server
                cat ~/.ssh/id_server
+               echo "${{ secrets.HOST }}"
            
         
       - name: Test SSH Connection
@@ -56,7 +57,7 @@ jobs:
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME}}
+          username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           script: |
             docker load -i /root/laravel-app.tar
