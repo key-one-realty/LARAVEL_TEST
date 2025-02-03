@@ -33,10 +33,10 @@ jobs:
                echo "${{ secrets.HOST }}"
            
         
-      - name: Test SSH Connection
+      - name: Debug SSH Connection from GitHub Actions
         run: |
-           ssh -vvv -i ~/.ssh/id_server -o StrictHostKeyChecking=no root@${{ secrets.HOST }} "echo '✅ SSH Connection Successful from GitHub Actions!'"
-
+             ssh -vvv -i ~/.ssh/id_server -o StrictHostKeyChecking=no root@${{ secrets.HOST }} "echo '✅ SSH Connection Successful from GitHub Actions!'"
+             
       - name: Build Laravel Docker Image
         run: |
           docker build -t laravel-app:latest .
