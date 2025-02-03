@@ -20,14 +20,14 @@ jobs:
       - name: Setup SSH Key
         run: |
              mkdir -p ~/.ssh
-             chmod 600 ~/.ssh/id_server
              echo "${{ secrets.KEY }}" | tr -d '\r' > ~/.ssh/id_server
+             chmod 600 ~/.ssh/id_server
              ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
 
         
       - name: Test SSH Connection
         run: |
-          ssh -i ~/.ssh/id_server -o StrictHostKeyChecking=no root@${{ secrets.HOST }} "echo 'SSH Authentication Successful!'"
+           ssh -vvv -i ~/.ssh/id_server -o StrictHostKeyChecking=no root@${{ secrets.HOST }} "echo '✅ SSH Connection Successful from GitHub Actions!'""
 
       - name: Build Laravel Docker Image
         run: |
