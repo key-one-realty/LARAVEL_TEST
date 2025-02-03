@@ -20,10 +20,10 @@ jobs:
       - name: Setup SSH Key
         run: |
             mkdir -p ~/.ssh
-            echo "${{ secrets.KEY }}" > ~/.ssh/id_server
-            chmod 600 ~/.ssh/id_server
+            echo "${{ secrets.KEY }}" > ~/.ssh/test_server
+            chmod 600 ~/.ssh/test_server
             ssh-keyscan -H ${{secrets.HOST }} >> ~/.ssh/known_hosts
-            cat ~/.ssh/id_server
+            cat ~/.ssh/test_server
 
       - name: Build Laravel Docker Image
         run: |
