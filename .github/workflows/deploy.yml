@@ -16,4 +16,4 @@ jobs:
 
       - name: Build Nginx docker image
         run: |
-          docker build -f nginxdockerfile -t TEST-docker:0.0.2 .
+          docker build -f nginxdockerfile -t test-docker:0.0.2 .
