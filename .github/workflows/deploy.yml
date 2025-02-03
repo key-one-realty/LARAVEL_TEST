@@ -18,23 +18,22 @@ jobs:
         run: |
           docker build -t laravel-app:latest .
           docker save -o laravel-app.tar laravel-app:latest
-          chmod 644 laravel-app.tar  
-          
+          chmod 600 laravel-app.tar  # ✅ Ensure correct permissions
 
       - name: Copy Docker Image to DigitalOcean Droplet
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.KEY }}
+          host: ${{ secrets.DROPLET_IP }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: laravel-app.tar
           target: /root/
 
       - name: Deploy on DigitalOcean Droplet
         uses: appleboy/ssh-action@v0.1.7
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
+          host: ${{ secrets.HOST}}
+          username: ${{ secrets.USERNAME}}
           key: ${{ secrets.KEY }}
           script: |
             docker load -i /root/laravel-app.tar
