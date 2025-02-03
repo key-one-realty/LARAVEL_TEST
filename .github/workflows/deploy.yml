@@ -19,17 +19,15 @@ jobs:
 
       - name: Setup SSH Key
         run: |
-             mkdir -p ~/.ssh
-             echo "${{ secrets.KEY }}" | tr -d '\r' > ~/.ssh/id_server
-             chmod 600 ~/.ssh/id_server
-             ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
-             chmod 644 ~/.ssh/known_hosts
-             echo "${{ secrets.KEY }}" > ~/.ssh/id_server
+          mkdir -p ~/.ssh
+          echo "${{ secrets.KEY }}" | tr -d '\r' > ~/.ssh/id_server
+          chmod 600 ~/.ssh/id_server
+          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+      
 
       - name: Debug SSH Key Output
         run: |
                file ~/.ssh/id_server
-               cat ~/.ssh/id_server
                echo "${{ secrets.HOST }}"
            
         
@@ -41,16 +39,16 @@ jobs:
         run: |
           docker build -t laravel-app:latest .
           docker save -o laravel-app.tar laravel-app:latest 
-          sudo chmod 777 laravel-app.tar # ✅ Ensure correct permissions
+          sudo chmod 644 laravel-app.tar # ✅ Ensure correct permissions
 
-      - name: Copy Docker Image to DigitalOcean Droplet
-        uses: appleboy/scp-action@v0.1.7
+      - name: Ensure Target Directory Exists on Server
+        uses: appleboy/ssh-action@v0.1.7
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.KEY }}
-          source: laravel-app.tar
-          target: /root/
+            host: ${{ secrets.HOST }}
+            username: ${{ secrets.USERNAME }}
+            key: ${{ secrets.KEY }}
+            script: |
+              mkdir -p /root/images/
           
 
       - name: Deploy on DigitalOcean Droplet
@@ -63,5 +61,6 @@ jobs:
             docker load -i /root/laravel-app.tar
             docker stop laravel-app || true
             docker rm laravel-app || true
-            docker run -d --name laravel-app -p 80:80 laravel-app:latest
-            docker system prune -af
+            docker run -d --name laravel-app -p 80:8000 laravel-app:latest
+            docker image prune -f
+
