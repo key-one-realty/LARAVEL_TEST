@@ -14,7 +14,7 @@ services:
     volumes:
       - ./:/var/www
     networks:
-      - TEST-network  # Replace with your network name
+      - test-network  # Replace with your network name
 
   db:
     image: mysql:8.0
@@ -42,8 +42,8 @@ services:
       - ./:/var/www
       - ./docker-compose/nginx:/etc/nginx/conf.d/
     networks:
-      - TEST-network  # Replace with your network name
+      - test-network  # Replace with your network name
 
 networks:
-  TEST-network:  # Replace with your desired network name
+  test-network:  # Replace with your desired network name
     driver: bridge
