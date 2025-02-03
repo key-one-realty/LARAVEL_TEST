@@ -21,7 +21,7 @@ jobs:
         run: |
              mkdir -p ~/.ssh
              echo "${{ secrets.KEY }}" | tr -d '\r' > ~/.ssh/id_server
-             chmod 600 ~/.ssh/id_server
+             chmod 777 ~/.ssh/id_server
              ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
 
         
