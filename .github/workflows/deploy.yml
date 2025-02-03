@@ -23,15 +23,13 @@ jobs:
              echo "${{ secrets.KEY }}" | tr -d '\r' > ~/.ssh/id_server
              chmod 600 ~/.ssh/id_server
              ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
-             echo "${{ secrets.KEY }}" | base64 --decode > ~/.ssh/id_server
-
+             echo "${{ secrets.KEY }}" > ~/.ssh/id_server
 
 
         
       - name: Test SSH Connection
         run: |
-           ssh -vvv -i ~/.ssh/id_server -o StrictHostKeyChecking=no root@${{ secrets.HOST }} "echo '✅ SSH Connection Successful from GitHub Actions!'"
-
+           ssh -vvv -i ~/.ssh/id_server -o StrictHostKeyChecking=no root@${{ secrets.HOST }} "echo '✅ SSH Connection Successful from GitHub Actions!'""
 
       - name: Build Laravel Docker Image
         run: |
