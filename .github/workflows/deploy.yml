@@ -24,6 +24,10 @@ jobs:
             chmod 600 ~/.ssh/id_server
             ssh-keyscan -H ${{secrets.HOST }} >> ~/.ssh/known_hosts
             cat ~/.ssh/id_server
+        
+      - name: Test SSH Connection
+        run: |
+          ssh -i ~/.ssh/id_server -o StrictHostKeyChecking=no root@${{ secrets.HOST }} "echo 'SSH Authentication Successful!'"
 
       - name: Build Laravel Docker Image
         run: |
