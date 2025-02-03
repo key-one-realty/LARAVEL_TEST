@@ -23,6 +23,8 @@ jobs:
              echo "${{ secrets.KEY }}" | tr -d '\r' > ~/.ssh/id_server
              chmod 600 ~/.ssh/id_server
              ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+             echo "${{ secrets.KEY }}" > ~/.ssh/id_server
+
 
         
       - name: Test SSH Connection
